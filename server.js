@@ -1,14 +1,16 @@
-const express = require('express')
-const app = express()
-const port = 3000
+var express = require('express');
+var app = express();
+const port = 3000;
+
+var mysql = require('mysql');
+
 
 app.use(express.json())
 
-app.post('/',(req,res)=>{
-    console.log(req.body)
-    res.json(req.body)
+app.get('/register',(req,res)=>{
+    res.send("Fuck");
 })
 
-app.listen(port,() => {
-    console.log("The Server is Running")
-})
+if (require.main === module) {
+    app.listen(port);
+}
