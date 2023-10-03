@@ -1,0 +1,13 @@
+{
+    "steps": [
+       {
+          "name": "gcr.io/cloud-builders/docker",
+          "args": [
+             "build",
+             "-t",
+             "us-central1-docker.pkg.dev/edusimstocktrade/Programmatical-tea/Edu_SimStockTrade/myimage",
+             "."
+          ]
+       }
+    ]
+ }
