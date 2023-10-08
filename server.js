@@ -8,7 +8,7 @@ var mysql = require('mysql');
 app.use(express.json())
 
 app.get('/register',(req,res)=>{
-    res.send("Fuck");
+    res.send("Hello world");
 })
 
 if (require.main === module) {
