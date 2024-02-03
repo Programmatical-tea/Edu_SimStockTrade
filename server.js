@@ -43,7 +43,7 @@ var temp = [];
 app.post('/test', (req,res) => {
     temp = req.body // Already parsed because of line 34
     getConnection((conn)=>{
-        conn.query('INSERT INTO investors_data VALUES (`권우혁`, 1, 2, 3, 4, 5, 6, 7);');
+        conn.query('INSERT INTO investors_data VALUES (`권우혁`, 1, 2, 3, 4, 5, 6, 7);',(err,res,fields) => {});
         conn.release();
     });
     res.send(JSON.stringify(temp));
