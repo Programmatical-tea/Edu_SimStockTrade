@@ -43,10 +43,26 @@ var temp = [];
 app.post('/test', (req,res) => {
     temp = req.body // Already parsed because of line 34
     getConnection((conn)=>{
-        conn.query('INSERT INTO investors_data VALUES (`권우혁`, 1, 2, 3, 4, 5, 6, 7);',(err,res,fields) => {});
+        conn.query('INSERT INTO investors_data VALUES ("권우혁", 1, 2, 3, 4, 5, 6, 7)',(err,res,fields) => {
+            if(err) throw err;
+            temp = res;
+        });
         conn.release();
     });
-    res.send(JSON.stringify(temp));
+    const responseBody = {
+        version: "2.0",
+        template: {
+          outputs: [
+            {
+              simpleImage: {
+                imageUrl: "https://t1.daumcdn.net/friends/prod/category/M001_friends_ryan2.jpg",
+                altText: "hello I'm Ryan"
+              }
+            }
+          ]
+        }
+      };
+    res.status(200).send(responseBody);
 })
 app.get('/',(req,res)=>{
     res.send(temp);
