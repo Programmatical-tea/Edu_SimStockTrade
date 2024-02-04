@@ -20,7 +20,8 @@ const createUnixSocketPool = async config => {
     ...config,
   });
 };
-var pool = createUnixSocketPool();
+
+createUnixSocketPool().then((res)=>(pool = res));
 
 function getConnection(callback){
     pool.getConnection((err,conn) => {
@@ -43,7 +44,7 @@ var temp = [];
 app.post('/test', (req,res) => {
     temp = req.body // Already parsed because of line 34
     getConnection((conn)=>{
-        conn.query('INSERT INTO investors_data VALUES ("권우혁", 1, 2, 3, 4, 5, 6, 7)',(err,res,fields) => {
+        conn.query('INSERT INTO investors_data (name, owned_capital, owned_stock, total_assets, ranking, 피터팬, MoA, RSEY) VALUES ("권우혁", 1, 2, 3, 4, 5, 6, 7)',(err,res,fields) => {
             if(err) throw err;
             temp = res;
         });
