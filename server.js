@@ -57,7 +57,7 @@ function insert_into_investors_data(connection, kakao_id, name, owned_capital, o
   })
 }*/
 
-function Query_with_SQLstring(connection, sqlstring, values){
+async function Query_with_SQLstring(connection, sqlstring, values){
   // Returns a Promise (Database Query)
   // Inserts data only in specified columns
   // Values must be taken in as an array
@@ -98,19 +98,17 @@ app.post('/register', (req,res) => {
   
   if (req.body["action"]["detailParams"]["team_name"]["value"] === "기업체"){
     // Get connnection
-    console.log("Is it going?")
     pool.getConnection((err, connection) => {
       if(err) throw err;
       // Use the connection!
-      console.log("Is it going?")
       // Changing tables company_data, company_trades_eachquarter, current_quarter_trades
       const kakao_id = req.body["userRequest"]["user"]["id"]
       const name = req.body["action"]["detailParams"]["my_name"]["value"]
       //Query_with_SQLstring(connection, SQL_insert_com_data, ) // Insert row into company data
-      Query_with_SQLstring(connection,SQL_insert_com_data,new Array(kakao_id,name,10000,0,0,0,1)).then((res)=>{temp = res})
+      temp = Query_with_SQLstring(connection,SQL_insert_com_data,new Array(kakao_id,name,10000,0,0,0,1))//.then((res)=>{temp = res})
       //Query_with_SQLstring(connection, ) // Insert row into company_trades
       //Query_with_SQLstring(connection, ) // Insert row into company_quarter_trades
-      console.log("Is it going?")
+
       connection.release();
     });
     res.status(200).send(Kakao_plaintext_response(`성공적으로 등록되었습니다! 반갑습니다 ${req.body["action"]["detailParams"]["my_name"]["value"]} 님!`));
