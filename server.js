@@ -107,13 +107,13 @@ app.post('/register', (req,res) => {
       const kakao_id = req.body["userRequest"]["user"]["id"]
       const name = req.body["action"]["detailParams"]["my_name"]["value"]
       //Query_with_SQLstring(connection, SQL_insert_com_data, ) // Insert row into company data
-      Query_with_SQLstring(connection,SQL_insert_com_data,new Array(kakao_id,name,10000,0,0,0,1))
+      Query_with_SQLstring(connection,SQL_insert_com_data,new Array(kakao_id,name,10000,0,0,0,1)).then((res)=>{temp = res})
       //Query_with_SQLstring(connection, ) // Insert row into company_trades
       //Query_with_SQLstring(connection, ) // Insert row into company_quarter_trades
       console.log("Is it going?")
       connection.release();
     });
-    res.status(200).send(Kakao_plaintext_response("성공적으로 등록되었습니다!"));
+    res.status(200).send(Kakao_plaintext_response(`성공적으로 등록되었습니다! 반갑습니다 ${req.body["action"]["detailParams"]["my_name"]["value"]} 님!`));
   }
 })
 
