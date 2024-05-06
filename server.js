@@ -21,15 +21,8 @@ const createUnixSocketPool = async config => {
   });
 };
 
+// Pool is created asynchronously
 createUnixSocketPool().then((res)=>(pool = res));
-
-function getConnection(callback){
-    pool.getConnection((err,conn) => {
-        if(!err) {
-            callback(conn);
-        }
-    });
-}
 
 // 4. Configure Middleware with app.use('urlpath', 'callback = middleware functions, array of them, etc')
 app.use(express.json()); // allows for parsing of JSON request body
@@ -48,8 +41,8 @@ var com_data = "company_data"
 var com_trade_eq = "company_trades_eachquarter"
 var cur_q_trade = "current_quarter_trades"
 
-var SQL_insert_inv_data = 'INSERT INTO `investors_data` (kakao_id, name, owned_capital, owned_stock, total_assets, ranking) VALUES (?,?,?,?,?,?)'
-var SQL_insert_com_data = 'INSERT INTO `company_data` (kakao_id, name, current_stock_price, fluctuation, numberof_shares, total_assets, ranking) VALUES (?,?,?,?,?,?,?)'
+var SQL_insert_inv_data = 'INSERT INTO `investors_data` (kakao_id, name, owned_capital, owned_stock, total_assets, ranking) VALUES (?,?,?,?,?,?);'
+var SQL_insert_com_data = 'INSERT INTO `company_data` (kakao_id, name, current_stock_price, fluctuation, numberof_shares, total_assets, ranking) VALUES (?,?,?,?,?,?,?);'
 
 
 ///////// Scenario 1: Register //////////
@@ -97,19 +90,27 @@ function Kakao_plaintext_response(message){
 app.post('/register', (req,res) => {
   // Read The JSON to see if it is 기업 or 투자
   // req.body["action"]["params"]["team_name"]["value"] = "투자자" or "기업체"
+  
   // If the Game has Already started, take no more.
-  res.status(200).send(Kakao_plaintext_response("게임이 이미 시작했습니다. 관리자에게 문의하시기 바랍니다."));
+  // res.status(200).send(Kakao_plaintext_response("게임이 이미 시작했습니다. 관리자에게 문의하시기 바랍니다."));
+  
   // For each case, Get a connection from the pool and perform the query the necessary strings.
-  /*
+  
   if (req.body["action"]["params"]["team_name"]["value"] === "기업체"){
     // Get connnection
     pool.getConnection((err, connection) => {
       if(err) throw err;
       // Use the connection!
+
       // Changing tables company_data, company_trades_eachquarter, current_quarter_trades
-      Query_with_SQLstring(connection, SQL_insert_com_data, [])
-    })
-  } */
+      Query_with_SQLstring(connection, SQL_insert_com_data, [req.body["userRequest"]["user"]["id"], req.body["action"]["params"]["my_name"]["value"], 10000, 0,0,0,1]) // Insert row into company data
+      //Query_with_SQLstring(connection, ) // Insert row into company_trades
+      //Query_with_SQLstring(connection, ) // Insert row into company_quarter_trades
+
+      connection.release();
+    });
+    res.status(200).send(Kakao_plaintext_response("성공적으로 등록되었습니다!"));
+  }
 })
 
 
