@@ -98,15 +98,16 @@ app.post('/register', (req,res) => {
   
   if (req.body["action"]["params"]["team_name"]["value"] === "기업체"){
     // Get connnection
+    console.log("Is it going?")
     pool.getConnection((err, connection) => {
       if(err) throw err;
       // Use the connection!
-
+      console.log("Is it going?")
       // Changing tables company_data, company_trades_eachquarter, current_quarter_trades
       Query_with_SQLstring(connection, SQL_insert_com_data, [req.body["userRequest"]["user"]["id"], req.body["action"]["params"]["my_name"]["value"], 10000, 0,0,0,1]) // Insert row into company data
       //Query_with_SQLstring(connection, ) // Insert row into company_trades
       //Query_with_SQLstring(connection, ) // Insert row into company_quarter_trades
-
+      console.log("Is it going?")
       connection.release();
     });
     res.status(200).send(Kakao_plaintext_response("성공적으로 등록되었습니다!"));
