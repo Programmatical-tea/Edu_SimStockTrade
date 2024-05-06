@@ -96,7 +96,7 @@ app.post('/register', (req,res) => {
   
   // For each case, Get a connection from the pool and perform the query the necessary strings.
   
-  if (req.body["action"]["params"]["team_name"]["value"] === "기업체"){
+  if (req.body["action"]["detailParams"]["team_name"]["value"] === "기업체"){
     // Get connnection
     console.log("Is it going?")
     pool.getConnection((err, connection) => {
@@ -104,7 +104,7 @@ app.post('/register', (req,res) => {
       // Use the connection!
       console.log("Is it going?")
       // Changing tables company_data, company_trades_eachquarter, current_quarter_trades
-      Query_with_SQLstring(connection, SQL_insert_com_data, [req.body["userRequest"]["user"]["id"], req.body["action"]["params"]["my_name"]["value"], 10000, 0,0,0,1]) // Insert row into company data
+      Query_with_SQLstring(connection, SQL_insert_com_data, [req.body["userRequest"]["user"]["id"], req.body["action"]["detailParams"]["my_name"]["value"], 10000, 0,0,0,1]) // Insert row into company data
       //Query_with_SQLstring(connection, ) // Insert row into company_trades
       //Query_with_SQLstring(connection, ) // Insert row into company_quarter_trades
       console.log("Is it going?")
