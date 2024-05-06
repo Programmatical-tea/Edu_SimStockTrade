@@ -106,7 +106,7 @@ app.post('/register', (req,res) => {
       // Changing tables company_data, company_trades_eachquarter, current_quarter_trades
       
       //Query_with_SQLstring(connection, SQL_insert_com_data, ) // Insert row into company data
-      connection.query(SQL_insert_com_data, [req.body["userRequest"]["user"]["id"], req.body["action"]["detailParams"]["my_name"]["value"], 10000, 0,0,0,1], (err, res, fields) => {
+      connection.query(SQL_insert_com_data, new Array(req.body["userRequest"]["user"]["id"], req.body["action"]["detailParams"]["my_name"]["value"], 10000, 0,0,0,1) , (err, res, fields) => {
         if(err) throw err;
         return res;
       })
