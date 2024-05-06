@@ -41,7 +41,7 @@ var com_data = "company_data"
 var com_trade_eq = "company_trades_eachquarter"
 var cur_q_trade = "current_quarter_trades"
 
-var SQL_insert_inv_data = 'INSERT INTO `investors_data` (kakao_id, name, owned_capital, owned_stock, total_assets, ranking) VALUES (?,?,?,?,?,?);'
+var SQL_insert_inv_data = 'INSERT INTO `investors_data` (kakao_id, name, owned_capital, owned_stock, total_assets, ranking) VALUES (?,?,?,?,?,?)'
 const SQL_insert_com_data = 'INSERT INTO `company_data` (kakao_id, name, current_stock_price, fluctuation, numberof_shares, total_assets, ranking) VALUES (?,?,?,?,?,?,?)'
 
 
@@ -107,10 +107,7 @@ app.post('/register', (req,res) => {
       const kakao_id = req.body["userRequest"]["user"]["id"]
       const name = req.body["action"]["detailParams"]["my_name"]["value"]
       //Query_with_SQLstring(connection, SQL_insert_com_data, ) // Insert row into company data
-      connection.query('INSERT INTO `company_data` (kakao_id, name, current_stock_price, fluctuation, numberof_shares, total_assets, ranking) VALUES (?,?,?,?,?,?,?)', new Array(kakao_id,name,10000,0,0,0,1) , (err, res, fields) => {
-        if(err) throw err;
-        return res;
-      })
+      Query_with_SQLstring(connection,SQL_insert_com_data,new Array(kakao_id,name,10000,0,0,0,1))
       //Query_with_SQLstring(connection, ) // Insert row into company_trades
       //Query_with_SQLstring(connection, ) // Insert row into company_quarter_trades
       console.log("Is it going?")
