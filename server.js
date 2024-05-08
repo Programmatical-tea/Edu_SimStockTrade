@@ -41,15 +41,16 @@ var com_data = "company_data"
 var com_trade_eq = "company_trades_eachquarter"
 var cur_q_trade = "current_quarter_trades"
 
-var SQL_insert_inv_data = 'INSERT INTO `investors_data` (kakao_id, name, owned_capital, owned_stock, total_assets, ranking) VALUES (?,?,?,?,?,?)'
+const SQL_insert_inv_data = 'INSERT INTO `investors_data` (kakao_id, name, owned_capital, owned_stock, total_assets, ranking) VALUES (?,?,?,?,?,?)'
 const SQL_insert_com_data = 'INSERT INTO `company_data` (kakao_id, name, current_stock_price, fluctuation, numberof_shares, total_assets, ranking) VALUES (?,?,?,?,?,?,?)'
+const SQL_insert_com_trades = 'INSERT INTO `company_trades_eachquarter` (name) VALUES (?)'
 
 
 ///////// Scenario 1: Register //////////
 
 /*
 function insert_into_investors_data(connection, kakao_id, name, owned_capital, owned_stock, total_assets, ranking){
-  // Returns a Promise. (database query)
+  // Returns a Promise. (database query encased in Promise.)
   // Inserts data only in specified columns
   return connection.query(, 
   [kakao_id,name,owned_capital,owned_stock,total_assets,ranking], (err,res,fields) => {
@@ -61,11 +62,13 @@ async function Query_with_SQLstring(connection, sqlstring, values){
   // Returns a Promise (Database Query)
   // Inserts data only in specified columns
   // Values must be taken in as an array
+  // Its an async function, to utilze the res, use .then((res)=>{}). 
   return connection.query(sqlstring, values, (err, res, fields) => {
     if(err) throw err;
     return res;
   })
 }
+
 
 function Kakao_plaintext_response(message){
   return {
@@ -103,13 +106,12 @@ app.post('/register', (req,res) => {
       // Use the connection!
       // Changing tables company_data, company_trades_eachquarter, current_quarter_trades
       const kakao_id = req.body["userRequest"]["user"]["id"]
-      const name = req.body["action"]["detailParams"]["my_name"]["value"]
-      //Query_with_SQLstring(connection, SQL_insert_com_data, ) // Insert row into company data
-      Query_with_SQLstring(connection,SQL_insert_com_data,new Array(kakao_id,name,10000,0,0,0,1)).then((res)=>{temp = 'This actually worked!'})
-      Query_with_SQLstring(connection,SQL_insert_com_data,new Array(kakao_id,name,10000,0,0,0,1)).then((res)=>{temp = 'This actually worked2!'})
-      Query_with_SQLstring(connection,SQL_insert_com_data,new Array(kakao_id,name,10000,0,0,0,1)).then((res)=>{temp = 'This actually worked3!'})
-      //Query_with_SQLstring(connection, ) // Insert row into company_trades
-      //Query_with_SQLstring(connection, ) // Insert row into company_quarter_trades
+      const name = req.body["action"]["detailParams"]["my_name"]["value"] // Making these lines makes debugging easier
+
+      // these 3 are done in one connection, so they are not done in parallel.
+      Query_with_SQLstring(connection,SQL_insert_com_data,new Array(kakao_id,name,10000,0,0,0,1)) // Insert row into company_data
+      Query_with_SQLstring(connection,SQL_insert_com_trades,new Array(name)) // Insert row into company_trades
+      //Query_with_SQLstring(connection, ) // Insert column into company_quarter_trades
 
       connection.release();
     });
