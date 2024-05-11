@@ -113,10 +113,10 @@ app.post('/register', (req,res) => {
       // these 3 are done in one connection, so they are not done in parallel.
       Query_with_SQLstring(connection,SQL_insert_com_data,new Array(kakao_id,name,10000,0,0,0,1)) // Insert row into company_data
         .then((result) => {Query_with_SQLstring(connection,SQL_insert_com_trades,new Array(name))}) // Insert row into company_trades
-        .then((result) => {Query_with_SQLstring(connection,SQL_insert_com_to_investor, new Array(name))}) // Insert column into investors_data
+        .then((result) => {Query_with_SQLstring(connection,SQL_insert_com_to_investor, new Array(name.replace(/^["'](.+(?=["']$))["']$/, '$1')))}) // Insert column into investors_data
         .then((result) => {
           res.status(200).send(Kakao_plaintext_response(`성공적으로 등록되었습니다! 반갑습니다 ${req.body["action"]["detailParams"]["my_name"]["value"]} 님!`));
-          connection.end()
+          connection.release()
         })
         .catch((err) => {
           res.status(200).send(Kakao_plaintext_response(`등록에 실패 했습니다. 관리자에게 연락해주세요.`));
