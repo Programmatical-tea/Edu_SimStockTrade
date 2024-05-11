@@ -7,7 +7,7 @@ const port = 8080;
 
 // 3. Configure DatabasePool?
 'use strict';
-const mysql = require('promise-mysql');
+const mysql = require('promise-mysql'); // Library for sending queries to my Database.
 // createUnixSocketPool initializes a Unix socket connection pool for
 // a Cloud SQL instance of MySQL.
 const createUnixSocketPool = async config => {
@@ -44,6 +44,8 @@ var cur_q_trade = "current_quarter_trades"
 const SQL_insert_inv_data = 'INSERT INTO `investors_data` (kakao_id, name, owned_capital, owned_stock, total_assets, ranking) VALUES (?,?,?,?,?,?)'
 const SQL_insert_com_data = 'INSERT INTO `company_data` (kakao_id, name, current_stock_price, fluctuation, numberof_shares, total_assets, ranking) VALUES (?,?,?,?,?,?,?)'
 const SQL_insert_com_trades = 'INSERT INTO `company_trades_eachquarter` (name) VALUES (?)'
+const SQL_insert_quarter_trades = 'ALTER TABLE current_ ADD COLUMN ? varchar(32) NOT NULL'
+const SQL_insert_com_to_investor = 'ALTER TABLE investors_data ADD COLUMN ? int NULL'
 
 
 ///////// Scenario 1: Register //////////
@@ -65,7 +67,7 @@ async function Query_with_SQLstring(connection, sqlstring, values){
   // Its an async function, to utilze the res, use .then((res)=>{}). 
   return connection.query(sqlstring, values, (err, res, fields) => {
     if(err) throw err;
-    return res;
+    return {"conn": connection, "res" : res};
   })
 }
 
@@ -110,12 +112,21 @@ app.post('/register', (req,res) => {
 
       // these 3 are done in one connection, so they are not done in parallel.
       Query_with_SQLstring(connection,SQL_insert_com_data,new Array(kakao_id,name,10000,0,0,0,1)) // Insert row into company_data
-      Query_with_SQLstring(connection,SQL_insert_com_trades,new Array(name)) // Insert row into company_trades
-      //Query_with_SQLstring(connection, ) // Insert column into company_quarter_trades
+        .then((result) => {Query_with_SQLstring(result.connection,SQL_insert_com_trades,new Array(name))}) // Insert row into company_trades
+        .then((result) => {Query_with_SQLstring(result.connection,SQL_insert_com_to_investor, new Array(name))}) // Insert column into investors_data
+        .then((result) => {
+          res.status(200).send(Kakao_plaintext_response(`성공적으로 등록되었습니다! 반갑습니다 ${req.body["action"]["detailParams"]["my_name"]["value"]} 님!`));
+          connection.end()
+        })
+        .catch((err) => {
+          res.status(200).send(Kakao_plaintext_response(`등록에 실패 했습니다. 관리자에게 연락해주세요.`));
+          console.log(err)
+        })
+       
+      // // Insert column into company_quarter_trades
 
-      connection.release();
     });
-    res.status(200).send(Kakao_plaintext_response(`성공적으로 등록되었습니다! 반갑습니다 ${req.body["action"]["detailParams"]["my_name"]["value"]} 님!`));
+    
   }
 })
 
