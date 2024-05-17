@@ -160,7 +160,7 @@ app.post('/register', (req,res) => {  // 서버URL/register 로 HTTP POST 리퀘
       }
 
     });
-    temp.push("GetConnectoin1");
+    temp.push("GetConnection1");
   }
 })
 
