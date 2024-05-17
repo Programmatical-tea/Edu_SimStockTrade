@@ -134,7 +134,7 @@ app.post('/register', (req,res) => {  // 서버URL/register 로 HTTP POST 리퀘
       const kakao_id = req.body["userRequest"]["user"]["id"] // 사용자 고유의 카카오톡id가 JSON 내부에 이 위치에 있다. 쓰기편하라고 이렇게 변수에 저장을 함.
       const name = req.body["action"]["detailParams"]["my_name"]["value"] // Making these lines makes debugging easier
 
-      if (Query_with_SQLstring(connection, SQL_kakao_com_data, new Array(kakao_id)).length != 0 ){
+      if (Query_with_SQLstring(connection, SQL_kakao_com_data, new Array(kakao_id)) != {} ){
         temp.push(Query_with_SQLstring(connection, SQL_kakao_com_data, new Array(kakao_id)))
         res.status(200).send(Kakao_plaintext_response(`이미 등록이 되어있는 계정입니다.`));
 
