@@ -41,11 +41,19 @@ var com_data = "company_data"
 var com_trade_eq = "company_trades_eachquarter"
 var cur_q_trade = "current_quarter_trades"
 
-const SQL_insert_inv_data = 'INSERT INTO `investors_data` (kakao_id, name, owned_capital, owned_stock, total_assets, ranking) VALUES (?,?,?,?,?,?)'
+// Common
+const SQL_kakao_inv_data = 'SELECT * FROM `investors_data` WHERE kakao_id = ?'
+const SQL_kakao_com_data = 'SELECT * FROM `company_data` WHERE kakao_id = ?'
+
+// Company
 const SQL_insert_com_data = 'INSERT INTO `company_data` (kakao_id, name, current_stock_price, fluctuation, numberof_shares, total_assets, ranking) VALUES (?,?,?,?,?,?,?)'
 const SQL_insert_com_trades = 'INSERT INTO `company_trades_eachquarter` (name) VALUES (?)'
-const SQL_insert_quarter_trades = 'ALTER TABLE current_ ADD COLUMN ? varchar(32) NOT NULL'
-function SQL_insert_com_to_investor(column){return `ALTER TABLE investors_data ADD COLUMN ${column} int NULL`} // this doesn't work properly because of quotation marks, either remove quotations or create new types of tables.
+function SQL_insert_com_to_quarter(column){return `ALTER TABLE current_quarter_trades ADD COLUMN ${column} varchar(32) NOT NULL`}
+function SQL_insert_com_to_investor(column){return `ALTER TABLE investors_data ADD COLUMN ${column} int NULL`}
+
+// Investor
+const SQL_insert_inv_data = 'INSERT INTO `investors_data` (kakao_id, name, owned_capital, owned_stock, total_assets, ranking) VALUES (?,?,?,?,?,?)'
+const SQL_insert_inv_to_quarter = 'INSERT INTO `current_quarter_trades` (name) VALUES (?)'
 
 
 ///////// Scenario 1: Register //////////
@@ -60,7 +68,7 @@ function insert_into_investors_data(connection, kakao_id, name, owned_capital, o
   })
 }*/
 
-async function Query_with_SQLstring(connection, sqlstring, values = []){
+async function Query_with_SQLstring(connection, sqlstring, values = []){ 
   // Returns a Promise (Database Query)
   // Inserts data only in specified columns
   // Values must be taken in as an array
@@ -86,6 +94,9 @@ function Kakao_plaintext_response(message){
     }
 }
 }
+
+
+var temp = [];
 
 /*function get_columns_db(db){
   // Works only for MySQL Databases!
@@ -123,6 +134,8 @@ app.post('/register', (req,res) => {  // 서버URL/register 로 HTTP POST 리퀘
       const kakao_id = req.body["userRequest"]["user"]["id"] // 사용자 고유의 카카오톡id가 JSON 내부에 이 위치에 있다. 쓰기편하라고 이렇게 변수에 저장을 함.
       const name = req.body["action"]["detailParams"]["my_name"]["value"] // Making these lines makes debugging easier
 
+      temp.push(Query_with_SQLstring(connection, SQL_kakao_com_data))
+
       // these 3 are done in one connection, so they are not done in parallel.
       Query_with_SQLstring(connection,SQL_insert_com_data,new Array(kakao_id,name,10000,0,0,0,1)) // Insert row into company_data // 커넥션을 가지고 query 3개를 보낸다.  
         .then((result) => {Query_with_SQLstring(connection,SQL_insert_com_trades,new Array(name))}) // Insert row into company_trades
@@ -130,6 +143,7 @@ app.post('/register', (req,res) => {  // 서버URL/register 로 HTTP POST 리퀘
         .then((result) => {
           res.status(200).send(Kakao_plaintext_response(`성공적으로 등록되었습니다! 반갑습니다 ${req.body["action"]["detailParams"]["my_name"]["value"]} 님!`));
           // 성공적으로 등록이 되었으면 카카오톡 답변을 카카오톡이 이해할수 있는 형식에 맞춰서 보낸다.
+          temp.push("Getconnection3")
           connection.release()
           // 그리고 마지막으로 더이상 connection을 안쓸 것이니 pool로 돌려보낸다.
         })
@@ -138,11 +152,10 @@ app.post('/register', (req,res) => {  // 서버URL/register 로 HTTP POST 리퀘
           res.status(200).send(Kakao_plaintext_response(`등록에 실패 했습니다. 관리자에게 연락해주세요.`));
           console.log(err)
         })
-       
-      // // Insert column into company_quarter_trades
+       temp.push("Getconnection2")
 
     });
-    
+    temp.push("GetConnectoin1");
   }
 })
 
@@ -152,7 +165,6 @@ app.post('/register', (req,res) => {  // 서버URL/register 로 HTTP POST 리퀘
 //////// Test Code //////////
 
 // Test1, when receive a post JSON body, add a random row to investors_data, then respond with a copy of the request 02.05 Success
-var temp = [];
 
 app.post('/test', (req,res) => {
     temp = req.body // Already parsed because of line 34
@@ -180,6 +192,10 @@ app.post('/test', (req,res) => {
 })
 app.get('/',(req,res)=>{
     res.send(temp);
+})
+
+app.get('/stop', (req,res)=>{
+
 })
 
 /////////////////////////////
