@@ -48,7 +48,7 @@ const SQL_kakao_com_data = 'SELECT * FROM `company_data` WHERE kakao_id = ?'
 // Company
 const SQL_insert_com_data = 'INSERT INTO `company_data` (kakao_id, name, current_stock_price, fluctuation, numberof_shares, total_assets, ranking) VALUES (?,?,?,?,?,?,?)'
 const SQL_insert_com_trades = 'INSERT INTO `company_trades_eachquarter` (name) VALUES (?)'
-function SQL_insert_com_to_quarter(column){return `ALTER TABLE current_quarter_trades ADD COLUMN ${column} varchar(32) NOT NULL`}
+function SQL_insert_com_to_quarter(column){return `ALTER TABLE current_quarter_trades ADD ${column}_buy int NULL, ${column}_sell int NULL`}
 function SQL_insert_com_to_investor(column){return `ALTER TABLE investors_data ADD COLUMN ${column} int NULL`}
 
 // Investor
@@ -134,10 +134,13 @@ app.post('/register', (req,res) => {  // 서버URL/register 로 HTTP POST 리퀘
       const kakao_id = req.body["userRequest"]["user"]["id"] // 사용자 고유의 카카오톡id가 JSON 내부에 이 위치에 있다. 쓰기편하라고 이렇게 변수에 저장을 함.
       const name = req.body["action"]["detailParams"]["my_name"]["value"] // Making these lines makes debugging easier
 
-      temp.push(Query_with_SQLstring(connection, SQL_kakao_com_data, new Array(kakao_id)))
+      if (Query_with_SQLstring(connection, SQL_kakao_com_data, new Array(kakao_id))){
 
-      // these 3 are done in one connection, so they are not done in parallel.
-      Query_with_SQLstring(connection,SQL_insert_com_data,new Array(kakao_id,name,10000,0,0,0,1)) // Insert row into company_data // 커넥션을 가지고 query 3개를 보낸다.  
+        res.status(200).send(Kakao_plaintext_response(`이미 등록이 되어있는 계정입니다.`));
+
+      } else {
+
+        Query_with_SQLstring(connection,SQL_insert_com_data,new Array(kakao_id,name,10000,0,0,0,1)) // Insert row into company_data // 커넥션을 가지고 query 3개를 보낸다.  
         .then((result) => {Query_with_SQLstring(connection,SQL_insert_com_trades,new Array(name))}) // Insert row into company_trades
         .then((result) => {Query_with_SQLstring(connection,SQL_insert_com_to_investor(name))}) // Insert column into investors_data
         .then((result) => {
@@ -153,6 +156,8 @@ app.post('/register', (req,res) => {  // 서버URL/register 로 HTTP POST 리퀘
           console.log(err)
         })
        temp.push("Getconnection2")
+
+      }
 
     });
     temp.push("GetConnectoin1");
