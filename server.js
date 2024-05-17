@@ -96,7 +96,7 @@ function Kakao_plaintext_response(message){
 }
 
 
-var temp = [];
+var temp = new Array();
 
 /*function get_columns_db(db){
   // Works only for MySQL Databases!
@@ -134,7 +134,7 @@ app.post('/register', (req,res) => {  // 서버URL/register 로 HTTP POST 리퀘
       const kakao_id = req.body["userRequest"]["user"]["id"] // 사용자 고유의 카카오톡id가 JSON 내부에 이 위치에 있다. 쓰기편하라고 이렇게 변수에 저장을 함.
       const name = req.body["action"]["detailParams"]["my_name"]["value"] // Making these lines makes debugging easier
 
-      temp.push(Query_with_SQLstring(connection, SQL_kakao_com_data))
+      temp.push(Query_with_SQLstring(connection, SQL_kakao_com_data, new Array(kakao_id)))
 
       // these 3 are done in one connection, so they are not done in parallel.
       Query_with_SQLstring(connection,SQL_insert_com_data,new Array(kakao_id,name,10000,0,0,0,1)) // Insert row into company_data // 커넥션을 가지고 query 3개를 보낸다.  
