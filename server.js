@@ -148,7 +148,7 @@ app.post('/register', (req,res) => {  // 서버URL/register 로 HTTP POST 리퀘
 
         temp.push(result);
 
-        if (result != {}){
+        if (result.length != 0){
           temp.push(Query_with_SQLstring(connection, SQL_kakao_com_data, new Array(kakao_id)))
           res.status(200).send(Kakao_plaintext_response(`이미 등록이 되어있는 계정입니다.`));
         } else {
