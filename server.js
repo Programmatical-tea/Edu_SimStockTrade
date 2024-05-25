@@ -82,7 +82,7 @@ async function Query_with_SQLstring(connection, sqlstring, values = []){
 
 function Query_with_SQLstring(connection, sqlstring, values = []){
   return new Promise((resolve, reject) => {
-    connection.query(sqlstring, (err, res) => {
+    connection.query(sqlstring, values, (err, res) => {
       if(err) throw err;
       else resolve(res);
     })
