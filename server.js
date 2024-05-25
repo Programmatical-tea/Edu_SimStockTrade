@@ -68,19 +68,12 @@ function insert_into_investors_data(connection, kakao_id, name, owned_capital, o
   })
 }*/
 
-/*
-async function Query_with_SQLstring(connection, sqlstring, values = []){ 
+
+function Query_with_SQLstring(connection, sqlstring, values = []){
   // Returns a Promise (Database Query)
   // Inserts data only in specified columns
   // Values must be taken in as an array
   // Its an async function, to utilze the res, use .then((res)=>{}). 
-  return connection.query(sqlstring, values, (err, res, fields) => {
-    if(err) throw err;
-    return res;
-  })
-}*/
-
-function Query_with_SQLstring(connection, sqlstring, values = []){
   return new Promise((resolve, reject) => {
     connection.query(sqlstring, values, (err, res) => {
       if(err) throw err;
@@ -145,16 +138,15 @@ app.post('/register', (req,res) => {  // 서버URL/register 로 HTTP POST 리퀘
       const name = req.body["action"]["detailParams"]["my_name"]["value"] // Making these lines makes debugging easier
 
       Query_with_SQLstring(connection, SQL_kakao_com_data, new Array(kakao_id)).then((result) => {
-
-        temp.push(result);
-
-        if (result.length != 0){
+        temp.push(result); // testing
+        if (result.length != 0){ // result is an array of objects
           temp.push(Query_with_SQLstring(connection, SQL_kakao_com_data, new Array(kakao_id)))
           res.status(200).send(Kakao_plaintext_response(`이미 등록이 되어있는 계정입니다.`));
         } else {
           Query_with_SQLstring(connection,SQL_insert_com_data,new Array(kakao_id,name,10000,0,0,0,1)) // Insert row into company_data // 커넥션을 가지고 query 3개를 보낸다.  
           .then((result) => {Query_with_SQLstring(connection,SQL_insert_com_trades,new Array(name))}) // Insert row into company_trades
           .then((result) => {Query_with_SQLstring(connection,SQL_insert_com_to_investor(name))}) // Insert column into investors_data
+          .then((result) => {Query_with_SQLstring(connection,SQL_insert_com_to_quarter(name))})
           .then((result) => {
             res.status(200).send(Kakao_plaintext_response(`성공적으로 등록되었습니다! 반갑습니다 ${req.body["action"]["detailParams"]["my_name"]["value"]} 님!`));
             // 성공적으로 등록이 되었으면 카카오톡 답변을 카카오톡이 이해할수 있는 형식에 맞춰서 보낸다.
@@ -167,8 +159,6 @@ app.post('/register', (req,res) => {  // 서버URL/register 로 HTTP POST 리퀘
             res.status(200).send(Kakao_plaintext_response(`등록에 실패 했습니다. 관리자에게 연락해주세요.`));
             console.log(err)
           })
-
-          temp.push("Getconnection2")  
         }
       })
 
@@ -176,7 +166,41 @@ app.post('/register', (req,res) => {  // 서버URL/register 로 HTTP POST 리퀘
 
     temp.push("GetConnection1");
   }
-})
+
+  if (req.body["action"]["detailParams"]["team_name"]["value"] === "투자자"){ 
+
+    pool.getConnection((err, connection) => { 
+
+      if(err) throw err; 
+      const kakao_id = req.body["userRequest"]["user"]["id"] // 사용자 고유의 카카오톡id가 JSON 내부에 이 위치에 있다. 쓰기편하라고 이렇게 변수에 저장을 함.
+      const name = req.body["action"]["detailParams"]["my_name"]["value"] // Making these lines makes debugging easier
+
+      Query_with_SQLstring(connection, SQL_kakao_inv_data, new Array(kakao_id)).then((result) => {
+        temp.push(result); // testing
+        if (result.length != 0){ // result is an array of objects
+          temp.push(Query_with_SQLstring(connection, SQL_kakao_inv_data, new Array(kakao_id)))
+          res.status(200).send(Kakao_plaintext_response(`이미 등록이 되어있는 계정입니다.`));
+        } else {
+          Query_with_SQLstring(connection,SQL_insert_inv_data,new Array(kakao_id,name,3000000,0,3000000,1)) // Insert row into investors_data // 커넥션을 가지고 query 3개를 보낸다.  
+          .then((result) => {Query_with_SQLstring(connection,SQL_insert_inv_to_quarter,new Array(name))}) // Insert row into current quarter
+          .then((result) => {
+            res.status(200).send(Kakao_plaintext_response(`성공적으로 등록되었습니다! 반갑습니다 ${req.body["action"]["detailParams"]["my_name"]["value"]} 님!`));
+            // 성공적으로 등록이 되었으면 카카오톡 답변을 카카오톡이 이해할수 있는 형식에 맞춰서 보낸다.
+            temp.push("Getconnection3")
+            connection.release()
+            // 그리고 마지막으로 더이상 connection을 안쓸 것이니 pool로 돌려보낸다.
+          })
+          .catch((err) => {
+            // 만약에 에러가 발생했다면 실패 했다고 전달함. 그리고 에러를 LOG에 적는다.
+            res.status(200).send(Kakao_plaintext_response(`등록에 실패 했습니다. 관리자에게 연락해주세요.`));
+            console.log(err)
+          })
+        }
+      })
+
+    })
+  } 
+});
 
 
 
