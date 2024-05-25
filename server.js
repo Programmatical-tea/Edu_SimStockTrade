@@ -68,6 +68,7 @@ function insert_into_investors_data(connection, kakao_id, name, owned_capital, o
   })
 }*/
 
+/*
 async function Query_with_SQLstring(connection, sqlstring, values = []){ 
   // Returns a Promise (Database Query)
   // Inserts data only in specified columns
@@ -76,6 +77,15 @@ async function Query_with_SQLstring(connection, sqlstring, values = []){
   return connection.query(sqlstring, values, (err, res, fields) => {
     if(err) throw err;
     return res;
+  })
+}*/
+
+function Query_with_SQLstring(connection, sqlstring, values = []){
+  return new Promise((resolve, reject) => {
+    connection.query(sqlstring, (err, res) => {
+      if(err) throw err;
+      else resolve(res);
+    })
   })
 }
 
@@ -137,7 +147,7 @@ app.post('/register', (req,res) => {  // 서버URL/register 로 HTTP POST 리퀘
       Query_with_SQLstring(connection, SQL_kakao_com_data, new Array(kakao_id)).then((result) => {
 
         temp.push(result);
-        
+
         if (result != {}){
           temp.push(Query_with_SQLstring(connection, SQL_kakao_com_data, new Array(kakao_id)))
           res.status(200).send(Kakao_plaintext_response(`이미 등록이 되어있는 계정입니다.`));
