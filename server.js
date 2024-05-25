@@ -136,31 +136,31 @@ app.post('/register', (req,res) => {  // 서버URL/register 로 HTTP POST 리퀘
 
       Query_with_SQLstring(connection, SQL_kakao_com_data, new Array(kakao_id)).then((result) => {
 
-        res.status(200).send(Kakao_plaintext_response(result));
-        /*
-        temp.push(Query_with_SQLstring(connection, SQL_kakao_com_data, new Array(kakao_id)))
-        res.status(200).send(Kakao_plaintext_response(`이미 등록이 되어있는 계정입니다.`));
-        */
-       
-      })
+        temp.push(result);
+        
+        if (result != {}){
+          temp.push(Query_with_SQLstring(connection, SQL_kakao_com_data, new Array(kakao_id)))
+          res.status(200).send(Kakao_plaintext_response(`이미 등록이 되어있는 계정입니다.`));
+        } else {
+          Query_with_SQLstring(connection,SQL_insert_com_data,new Array(kakao_id,name,10000,0,0,0,1)) // Insert row into company_data // 커넥션을 가지고 query 3개를 보낸다.  
+          .then((result) => {Query_with_SQLstring(connection,SQL_insert_com_trades,new Array(name))}) // Insert row into company_trades
+          .then((result) => {Query_with_SQLstring(connection,SQL_insert_com_to_investor(name))}) // Insert column into investors_data
+          .then((result) => {
+            res.status(200).send(Kakao_plaintext_response(`성공적으로 등록되었습니다! 반갑습니다 ${req.body["action"]["detailParams"]["my_name"]["value"]} 님!`));
+            // 성공적으로 등록이 되었으면 카카오톡 답변을 카카오톡이 이해할수 있는 형식에 맞춰서 보낸다.
+            temp.push("Getconnection3")
+            connection.release()
+            // 그리고 마지막으로 더이상 connection을 안쓸 것이니 pool로 돌려보낸다.
+          })
+          .catch((err) => {
+            // 만약에 에러가 발생했다면 실패 했다고 전달함. 그리고 에러를 LOG에 적는다.
+            res.status(200).send(Kakao_plaintext_response(`등록에 실패 했습니다. 관리자에게 연락해주세요.`));
+            console.log(err)
+          })
 
-      Query_with_SQLstring(connection,SQL_insert_com_data,new Array(kakao_id,name,10000,0,0,0,1)) // Insert row into company_data // 커넥션을 가지고 query 3개를 보낸다.  
-      .then((result) => {Query_with_SQLstring(connection,SQL_insert_com_trades,new Array(name))}) // Insert row into company_trades
-      .then((result) => {Query_with_SQLstring(connection,SQL_insert_com_to_investor(name))}) // Insert column into investors_data
-      .then((result) => {
-        res.status(200).send(Kakao_plaintext_response(`성공적으로 등록되었습니다! 반갑습니다 ${req.body["action"]["detailParams"]["my_name"]["value"]} 님!`));
-        // 성공적으로 등록이 되었으면 카카오톡 답변을 카카오톡이 이해할수 있는 형식에 맞춰서 보낸다.
-        temp.push("Getconnection3")
-        connection.release()
-        // 그리고 마지막으로 더이상 connection을 안쓸 것이니 pool로 돌려보낸다.
+          temp.push("Getconnection2")  
+        }
       })
-      .catch((err) => {
-        // 만약에 에러가 발생했다면 실패 했다고 전달함. 그리고 에러를 LOG에 적는다.
-        res.status(200).send(Kakao_plaintext_response(`등록에 실패 했습니다. 관리자에게 연락해주세요.`));
-        console.log(err)
-      })
-
-      temp.push("Getconnection2")      
 
     });
 
