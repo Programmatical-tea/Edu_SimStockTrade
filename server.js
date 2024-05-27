@@ -79,7 +79,8 @@ function investors_data_string(values){
 function extra_investors(values, investors_keys){
   let temp_str = "각 회사별 주식 수: ";
   for(let i = 6; i < investors_keys.length; i++){
-    temp_str += `\n${investors_keys[i]} 주식: ${values[investors_keys[i]]}개`
+    temp_str += `
+    ${investors_keys[i]} 주식: ${values[investors_keys[i]]}개`
   }
   return temp_str;
 }
