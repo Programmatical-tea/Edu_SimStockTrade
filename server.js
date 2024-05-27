@@ -251,6 +251,7 @@ app.post('/information', (req,res) => {
         Query_with_SQLstring(connection, SQL_kakao_com_data, new Array(kakao_id)).then((result)=>{
           if(result.length != 0) {
             // Company
+            temp.push(result);
             res.status(200).send(Kakao_plaintext_response(company_data_string(result)));
           }
           else {
