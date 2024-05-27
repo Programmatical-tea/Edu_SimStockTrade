@@ -45,6 +45,9 @@ TRUNCATE TABLE
 
 */
 
+// Flag
+var Tradable = new Boolean(false)
+
 // Common SQL
 const SQL_kakao_inv_data = 'SELECT * FROM `investors_data` WHERE kakao_id = ?'
 const SQL_kakao_com_data = 'SELECT * FROM `company_data` WHERE kakao_id = ?'
@@ -267,8 +270,25 @@ app.post('/information', (req,res) => {
 
 })
 
-///////// Scenario 3: Information //////////
+///////// Scenario 3: Timer //////////
+const first_quarter_time_start = new Date("2024-05-27T21:16:00");
+const first_quarter_time_end = new Date("2024-05-27T21:17:00");
 
+function Time_Check(){
+  setTimeout(()=>{
+    if(Date.now() > first_quarter_time_start && Date.now() < first_quarter_time_end){
+      Tradable = true;
+      temp.push(Tradable)
+      Time_Check();
+    } else {
+      Tradable = false;
+      temp.push(Tradable)
+      Time_Check();
+    }
+  }, 1000)
+}
+
+Time_Check();
 
 //////// Test Code //////////
 
