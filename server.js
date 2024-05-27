@@ -36,38 +36,73 @@ app.use(express.json()); // allows for parsing of JSON request body
 // company_trades_eachquarter (name, 1_buy, 1_sell, 1_net, 1_price, 2_buy, 2_sell, 2_net, 2_price, 3-1_buy, 3-1_sell, 3-1_net, 3-1_price, 3-2_buy, 3-2_sell, 3-2_net, 3-2_price, 4_buy, 4_sell, 4_net, 4_price, sum)
 // current_quarter_trades (피터팬_buy, 피터팬_sell, MoA_buy, MoA_sell, RSEY_buy, RSEY_sell)
 
-var inv_data = "investors_data"
-var com_data = "company_data"
-var com_trade_eq = "company_trades_eachquarter"
-var cur_q_trade = "current_quarter_trades"
 
-// Common
+/* Initializing
+DROP TABLE investors_data;
+DROP TABLE
+TRUNCATE TABLE
+
+
+*/
+
+// Common SQL
 const SQL_kakao_inv_data = 'SELECT * FROM `investors_data` WHERE kakao_id = ?'
 const SQL_kakao_com_data = 'SELECT * FROM `company_data` WHERE kakao_id = ?'
 
-// Company
+// Company SQL
 const SQL_insert_com_data = 'INSERT INTO `company_data` (kakao_id, name, current_stock_price, fluctuation, numberof_shares, total_assets, ranking) VALUES (?,?,?,?,?,?,?)'
 const SQL_insert_com_trades = 'INSERT INTO `company_trades_eachquarter` (name) VALUES (?)'
 function SQL_insert_com_to_quarter(column){return `ALTER TABLE current_quarter_trades ADD ${column}_buy int NULL, ${column}_sell int NULL`}
 function SQL_insert_com_to_investor(column){return `ALTER TABLE investors_data ADD COLUMN ${column} int NULL`}
 
-// Investor
+// Investor SQL
 const SQL_insert_inv_data = 'INSERT INTO `investors_data` (kakao_id, name, owned_capital, owned_stock, total_assets, ranking) VALUES (?,?,?,?,?,?)'
 const SQL_insert_inv_to_quarter = 'INSERT INTO `current_quarter_trades` (name) VALUES (?)'
 
+// Message 
+function investors_data_string(values){
+  // Values are inputted as object
+  const investors_keys = Object.keys(values)
+  return `${values[investors_keys[1]]} 님의 정보는 다음과 같습니다.
+  
+  현재 보유자본(KRW): ${values[investors_keys[2]]}
+  현재 보유주식(KRW): ${values[investors_keys[3]]}
+  
+  총 자산(KRW): ${values[investors_keys[4]]}
 
-///////// Scenario 1: Register //////////
+  자산 순위: ${values[investors_keys[5]]}
 
-/*
-function insert_into_investors_data(connection, kakao_id, name, owned_capital, owned_stock, total_assets, ranking){
-  // Returns a Promise. (database query encased in Promise.)
-  // Inserts data only in specified columns
-  return connection.query(, 
-  [kakao_id,name,owned_capital,owned_stock,total_assets,ranking], (err,res,fields) => {
-    if(err) throw err;
-  })
-}*/
+  각 회사별 주식 수:
+  ` + extra_investors(values, investors_keys);
+}
 
+function extra_investors(values, investors_keys){
+  let temp_str = "각 회사별 주식 수: ";
+  for(let i = 6; i < investors_keys.length; i++){
+    temp_str += `\n${investors_keys[i]} 주식: ${values[investors_keys[i]]}개`
+  }
+  return temp_str;
+}
+
+function company_data_string(values){
+  const company_keys = Object.keys(values)
+  return `${values[company_keys[1]]} 님의 정보는 다음과 같습니다.
+  
+  현재 주가(KRW): ${values[company_keys[2]]}
+
+  등락(KRW): ${values[company_keys[3]]}
+
+  총 주식 수량: ${values[company_keys[4]]}
+
+  총 자산: ${values[company_keys[5]]}
+
+  자산 순위: ${values[company_keys[6]]}위
+  `
+}
+
+
+
+// Common Function
 
 function Query_with_SQLstring(connection, sqlstring, values = []){
   // Returns a Promise (Database Query)
@@ -81,7 +116,6 @@ function Query_with_SQLstring(connection, sqlstring, values = []){
     })
   })
 }
-
 
 function Kakao_plaintext_response(message){
   return {
@@ -99,12 +133,9 @@ function Kakao_plaintext_response(message){
 }
 
 
-var temp = new Array();
+///////// Scenario 1: Register //////////
 
-/*function get_columns_db(db){
-  // Works only for MySQL Databases!
-  return `SHOW COLUMNS FROM ${db}`
-}*/
+var temp = new Array();
 
 app.post('/register', (req,res) => {  // 서버URL/register 로 HTTP POST 리퀘스트를 받았을때, 아래 코드를 실행해라 라는 조건문임. 
   // HTTP POST를 읽는 이유는 Kakao bot에서 API로 보내는 리퀘스트가 POST 이기 때문이다. 이건 카카오톡 스킬 관련된 문서에 나와있음.
@@ -202,7 +233,36 @@ app.post('/register', (req,res) => {  // 서버URL/register 로 HTTP POST 리퀘
   } 
 });
 
+///////// Scenario 2: Information //////////
 
+app.post('/information', (req,res) => {
+
+  // Create a Connection
+  pool.getConnection((err, connection) => {
+
+    const kakao_id = req.body["userRequest"]["user"]["id"]
+
+    Query_with_SQLstring(connection, SQL_kakao_inv_data, new Array(kakao_id))
+    .then((result) => {
+      if(result.length != 0) {
+        // Investor
+        res.status(200).send(Kakao_plaintext_response(investors_data_string(result)));
+      } else {
+        Query_with_SQLstring(connection, SQL_kakao_com_data, new Array(kakao_id)).then((result)=>{
+          if(result.length != 0) {
+            // Company
+            res.status(200).send(Kakao_plaintext_response(company_data_string(result)));
+          }
+          else {
+            res.status(200).send(Kakao_plaintext_response("등록이 되어있지 않은 계정입니다."));
+          }
+        })
+      }
+    })
+  })
+
+
+})
 
 
 //////// Test Code //////////
