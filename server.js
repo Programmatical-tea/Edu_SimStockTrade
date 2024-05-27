@@ -153,8 +153,10 @@ app.post('/register', (req,res) => {  // 서버URL/register 로 HTTP POST 리퀘
   // res.status(200).send(Kakao_plaintext_response("게임이 이미 시작했습니다. 관리자에게 문의하시기 바랍니다."));
   
   // For each case, Get a connection from the pool and perform the query the necessary strings.
-  
-  if (req.body["action"]["detailParams"]["team_name"]["value"] === "기업체"){ // 카카오톡 봇이 서버에게 주는 "방금 사용자가 보낸 카톡에 대한 정보" 는 JSON 형식으로 주어진다. 
+  if (Tradable == True){
+    res.status(200).send(Kakao_plaintext_response(`게임이 진행중인 동안에는 등록할 수 없습니다.`));
+  }
+  else if (req.body["action"]["detailParams"]["team_name"]["value"] === "기업체"){ // 카카오톡 봇이 서버에게 주는 "방금 사용자가 보낸 카톡에 대한 정보" 는 JSON 형식으로 주어진다. 
     // 그 JSON에서 team_name이라는 엔티티 값을 읽는다.
     // 만약에 team_name이 "기업체" 이라면 아래 코드를 실행한다는 조건문임.
 
@@ -203,7 +205,7 @@ app.post('/register', (req,res) => {  // 서버URL/register 로 HTTP POST 리퀘
     temp.push("GetConnection1");
   }
 
-  if (req.body["action"]["detailParams"]["team_name"]["value"] === "투자자"){ 
+  else if (req.body["action"]["detailParams"]["team_name"]["value"] === "투자자"){ 
 
     pool.getConnection((err, connection) => { 
 
@@ -271,18 +273,16 @@ app.post('/information', (req,res) => {
 })
 
 ///////// Scenario 3: Timer //////////
-const first_quarter_time_start = new Date("2024-05-27T21:16:00");
-const first_quarter_time_end = new Date("2024-05-27T21:17:00");
+const first_quarter_time_start = new Date("2024-05-27T21:47:00");
+const first_quarter_time_end = new Date("2024-05-27T21:54:00");
 
 function Time_Check(){
   setTimeout(()=>{
     if(Date.now() > first_quarter_time_start && Date.now() < first_quarter_time_end){
       Tradable = true;
-      temp.push(Tradable)
       Time_Check();
     } else {
       Tradable = false;
-      temp.push(Tradable)
       Time_Check();
     }
   }, 1000)
