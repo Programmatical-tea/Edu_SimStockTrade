@@ -254,6 +254,7 @@ app.post('/information', (req,res) => {
           if(result.length != 0) {
             // Company
             temp.push(result);
+            temp.push(Date.now());
             res.status(200).send(Kakao_plaintext_response(company_data_string(result[0])));
           }
           else {
@@ -264,8 +265,9 @@ app.post('/information', (req,res) => {
     })
   })
 
-
 })
+
+///////// Scenario 3: Information //////////
 
 
 //////// Test Code //////////
