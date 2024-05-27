@@ -247,13 +247,13 @@ app.post('/information', (req,res) => {
     .then((result) => {
       if(result.length != 0) {
         // Investor
-        res.status(200).send(Kakao_plaintext_response(investors_data_string(result)));
+        res.status(200).send(Kakao_plaintext_response(investors_data_string(result[0])));
       } else {
         Query_with_SQLstring(connection, SQL_kakao_com_data, new Array(kakao_id)).then((result)=>{
           if(result.length != 0) {
             // Company
             temp.push(result);
-            res.status(200).send(Kakao_plaintext_response(company_data_string(result)));
+            res.status(200).send(Kakao_plaintext_response(company_data_string(result[0])));
           }
           else {
             res.status(200).send(Kakao_plaintext_response("등록이 되어있지 않은 계정입니다."));
