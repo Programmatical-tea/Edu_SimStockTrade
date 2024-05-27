@@ -86,17 +86,18 @@ function extra_investors(values, investors_keys){
 
 function company_data_string(values){
   const company_keys = Object.keys(values)
-  return `${values.company_keys[1]} 님의 정보는 다음과 같습니다.
+  temp.push(company_keys);
+  return `${values[company_keys[1]]} 님의 정보는 다음과 같습니다.
   
-  현재 주가(KRW): ${values.company_keys[2]}
+  현재 주가(KRW): ${values[company_keys[2]]}
 
-  등락(KRW): ${values.company_keys[3]}
+  등락(KRW): ${values[company_keys[3]]}
 
-  총 주식 수량: ${values.company_keys[4]}
+  총 주식 수량: ${values[company_keys[4]]}
 
-  총 자산: ${values.company_keys[5]}
+  총 자산: ${values[company_keys[5]]}
 
-  자산 순위: ${values.company_keys[6]}위
+  자산 순위: ${values[company_keys[6]]}위
   `
 }
 
