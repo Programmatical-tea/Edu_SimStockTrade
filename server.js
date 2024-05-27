@@ -274,15 +274,15 @@ app.post('/information', (req,res) => {
 
 ///////// Scenario 3: Timer //////////
 const first_quarter_time_start = new Date("2024-05-27T21:47:00");
-const first_quarter_time_end = new Date("2024-05-27T22:00:00");
+const first_quarter_time_end = new Date("2024-05-27T23:00:00");
 
 function Time_Check(){
   setTimeout(()=>{
     if(Date.now() > first_quarter_time_start && Date.now() < first_quarter_time_end){
-      Tradable = true;
+      Tradable = new Boolean(true);
       Time_Check();
     } else {
-      Tradable = false;
+      Tradable = new Boolean(false);
       Time_Check();
     }
   }, 1000)
