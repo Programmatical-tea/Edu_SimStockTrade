@@ -274,7 +274,7 @@ app.post('/information', (req,res) => {
 
 ///////// Scenario 3: Timer //////////
 const first_quarter_time_start = new Date("2024-05-27T21:47:00");
-const first_quarter_time_end = new Date("2024-05-27T21:54:00");
+const first_quarter_time_end = new Date("2024-05-27T22:00:00");
 
 function Time_Check(){
   setTimeout(()=>{
