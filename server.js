@@ -153,7 +153,7 @@ app.post('/register', (req,res) => {  // 서버URL/register 로 HTTP POST 리퀘
   // res.status(200).send(Kakao_plaintext_response("게임이 이미 시작했습니다. 관리자에게 문의하시기 바랍니다."));
   
   // For each case, Get a connection from the pool and perform the query the necessary strings.
-  if (Tradable == True){
+  if (Tradable){
     res.status(200).send(Kakao_plaintext_response(`게임이 진행중인 동안에는 등록할 수 없습니다.`));
   }
   else if (req.body["action"]["detailParams"]["team_name"]["value"] === "기업체"){ // 카카오톡 봇이 서버에게 주는 "방금 사용자가 보낸 카톡에 대한 정보" 는 JSON 형식으로 주어진다. 
